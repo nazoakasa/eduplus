@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ドメイン＆サービス統合案内ポータル | Network Hub Map</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            500: '#0284c7',
+                            600: '#0369a1',
+                            700: '#075985',
+                            900: '#0c4a6e',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Noto+Sans+JP:wght@300;400;500;700&display=swap');
+        body {
+            font-family: 'Noto Sans JP', 'Inter', sans-serif;
+            background-color: #0f172a;
+            color: #f8fafc;
+        }
+        .code-font {
+            font-family: 'JetBrains Mono', monospace;
+        }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #1e293b;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #475569;
+        }
+        
+        .grid-bg {
+            background-size: 40px 40px;
+            background-image: 
+                linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+        }
+
+        .glow-effect {
+            box-shadow: 0 0 25px -5px rgba(2, 132, 199, 0.25);
+        }
+        .glow-effect-hover:hover {
+            box-shadow: 0 0 30px -2px rgba(2, 132, 199, 0.4);
+        }
+    </style>
+</head>
+<body class="min-h-screen grid-bg flex flex-col selection:bg-sky-500 selection:text-white">
+
+    <!-- Header -->
+    <header class="sticky top-0 z-30 bg-slate-900/80 backdrop-blur-md border-b border-slate-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-sky-600 to-indigo-500 flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-sky-500/20">
+                    <i class="fa-solid fa-sitemap"></i>
+                </div>
+                <div>
+                    <span class="text-xs uppercase tracking-wider text-sky-400 font-semibold block code-font">Network Hub</span>
+                    <h1 class="text-lg font-bold text-white leading-none">ドメイン・サイト統合ディレクトリ</h1>
+                </div>
+            </div>
+
+            <div class="flex items-center space-x-3">
+                <button id="viewToggleBtn" onclick="toggleViewMode()" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm font-medium border border-slate-700 transition flex items-center gap-2">
+                    <i class="fa-solid fa-folder-tree"></i>
+                    <span id="viewModeText">カード表示</span>
+                </button>
+                <button onclick="openAddModal()" class="px-4 py-1.5 rounded-lg bg-sky-600 hover:bg-sky-500 text-white text-sm font-medium shadow-md shadow-sky-600/30 transition flex items-center gap-2">
+                    <i class="fa-solid fa-plus"></i>
+                    <span>サイト追加</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+        <!-- Hero Banner / Brand Switcher -->
+        <div class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 border border-slate-700/60 p-6 sm:p-8 mb-8 shadow-2xl">
+            <div class="absolute -right-10 -bottom-10 w-64 h-64 bg-sky-500/10 rounded-full blur-3xl pointer-events-none"></div>
+            <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+                <div>
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-500/10 border border-sky-500/20 text-sky-400 text-xs font-medium mb-3">
+                        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                        運営サイトグループ・ネットワークマップ
+                    </div>
+                    <h2 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+                        <span id="brandNameDisplay" class="text-transparent bg-clip-text bg-gradient-to-r from-sky-400 to-indigo-300">MyBrand Services</span> サイト一覧
+                    </h2>
+                    <p class="text-slate-400 mt-2 text-sm max-w-2xl">
+                        本家メインサイトをはじめ、各機能特化サブドメイン・関連Webアプリケーションを一元案内しています。目的のサイト・機能へのアクセスにお役立てください。
+                    </p>
+                </div>
+
+                <div class="flex flex-col sm:flex-row gap-3 bg-slate-950/50 p-3 rounded-xl border border-slate-800">
+                    <div class="text-xs text-slate-400 flex flex-col justify-center px-2">
+                        <span>表示ブランド切替:</span>
+                    </div>
+                    <select id="brandSelect" onchange="switchBrand(this.value)" class="bg-slate-800 text-slate-200 text-sm font-medium rounded-lg border border-slate-700 px-3 py-2 focus:outline-none focus:border-sky-500 code-font">
+                        <!-- Dynamic options -->
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filter & Search Controls -->
+        <div class="flex flex-col md:flex-row gap-4 mb-8 justify-between items-stretch md:items-center">
+            <!-- Search -->
+            <div class="relative flex-grow max-w-md">
+                <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500"></i>
+                <input type="text" id="searchInput" oninput="filterSites()" placeholder="ドメイン、サイト名、キーワードで検索..." class="w-full bg-slate-900 border border-slate-800 rounded-xl pl-10 pr-4 py-2.5 text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 transition">
+            </div>
+
+            <!-- Categories -->
+            <div id="categoryFilterContainer" class="flex items-center gap-1.5 overflow-x-auto pb-2 md:pb-0 scrollbar-none">
+                <!-- Filter buttons rendered dynamically -->
+            </div>
+        </div>
+
+        <!-- Main Content Area -->
+        <div id="siteGridContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Site cards rendered dynamically -->
+        </div>
+
+        <!-- Tree View Container (Hidden by default) -->
+        <div id="siteTreeContainer" class="hidden bg-slate-900 border border-slate-800 rounded-2xl p-6 sm:p-8">
+            <h3 class="text-lg font-bold text-white mb-6 flex items-center gap-2">
+                <i class="fa-solid fa-sitemap text-sky-400"></i> ドメイン階層マップ
+            </h3>
+            <div id="treeViewContent" class="space-y-6">
+                <!-- Tree view dynamically generated -->
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-slate-800/80 bg-slate-950/60 py-8 mt-12 text-center text-xs text-slate-500">
+        <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row justify-between items-center gap-4">
+            <div class="flex items-center gap-2">
+                <i class="fa-solid fa-network-wired text-sky-500"></i>
+                <span class="font-semibold text-slate-400">Domain Directory Hub</span>
+            </div>
+            <div>
+                &copy; <span id="year"></span> All operations and subdomains managed properly.
+            </div>
+        </div>
+    </footer>
+
+    <!-- Site Detail Modal -->
+    <div id="detailModal" class="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 hidden opacity-0 transition-opacity duration-200">
+        <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-xl w-full p-6 sm:p-8 relative shadow-2xl transform scale-95 transition-transform duration-200" id="detailModalCard">
+            <button onclick="closeModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center transition">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <div id="modalContent">
+                <!-- Modal content dynamically loaded -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Site Modal -->
+    <div id="addModal" class="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+        <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-lg w-full p-6 relative shadow-2xl">
+            <button onclick="closeAddModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center transition">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <h3 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                <i class="fa-solid fa-plus-circle text-sky-400"></i> 新規サブドメイン・サイト登録
+            </h3>
+            <form id="addSiteForm" onsubmit="handleAddSite(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-400 mb-1">サイト・サービス名</label>
+                    <input type="text" id="addTitle" required placeholder="例: 公式ドキュメント" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-sky-500">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-400 mb-1">ドメイン/URL</label>
+                        <input type="text" id="addDomain" required placeholder="docs.example.com" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-200 code-font focus:outline-none focus:border-sky-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-400 mb-1">カテゴリ</label>
+                        <select id="addCategory" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-sky-500">
+                            <option value="main">本家・メイン</option>
+                            <option value="app">WEBアプリ・サービス</option>
+                            <option value="docs">ドキュメント・ヘルプ</option>
+                            <option value="dev">開発者・API</option>
+                            <option value="media">ブログ・メディア</option>
+                            <option value="other">その他</option>
+                        </select>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-400 mb-1">サイト概要説明</label>
+                    <textarea id="addDesc" required rows="3" placeholder="このサブドメイン・サイトの役割や機能を入力..." class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-sky-500"></textarea>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-400 mb-1">主要ターゲット / 利用用途</label>
+                    <input type="text" id="addTarget" placeholder="例: 開発者、一般ユーザー" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-sky-500">
+                </div>
+                <div class="pt-2 flex justify-end gap-2">
+                    <button type="button" onclick="closeAddModal()" class="px-4 py-2 rounded-lg bg-slate-800 text-slate-300 text-sm hover:bg-slate-700">キャンセル</button>
+                    <button type="submit" class="px-4 py-2 rounded-lg bg-sky-600 text-white text-sm font-medium hover:bg-sky-500 shadow-md shadow-sky-600/30">登録保存</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Notification Toast -->
+    <div id="toast" class="fixed bottom-6 right-6 z-50 bg-slate-800 border border-sky-500/50 text-white px-4 py-3 rounded-xl shadow-2xl flex items-center gap-3 translate-y-20 opacity-0 transition-all duration-300">
+        <i class="fa-solid fa-circle-check text-sky-400 text-lg"></i>
+        <span id="toastMsg" class="text-sm font-medium"></span>
+    </div>
+
+    <script>
+        // Data Structure for Brands & Subdomains
+        const INITIAL_DATA = [
+            {
+                id: 'brand-1',
+                brandName: 'Apex Cloud (Apexグループ)',
+                rootDomain: 'apexcloud.io',
+                sites: [
+                    {
+                        id: 's1',
+                        title: 'Apex Cloud 公式ポータル',
+                        domain: 'apexcloud.io',
+                        url: 'https://apexcloud.io',
+                        category: 'main',
+                        status: 'Live',
+                        description: 'Apex Cloudブランドの統合トップページ。最新ニュース、製品ラインナップ、企業情報を一覧できます。',
+                        target: '全ユーザー・法人検討者',
+                        isRoot: true,
+                        icon: 'fa-globe',
+                        badges: ['Main Site', 'SSL Active']
+                    },
+                    {
+                        id: 's2',
+                        title: 'Apex App Console',
+                        domain: 'app.apexcloud.io',
+                        url: 'https://app.apexcloud.io',
+                        category: 'app',
+                        status: 'Live',
+                        description: 'クラウドインフラやプロジェクトを一元管理するためのログイン型メインダッシュボードアプリケーション。',
+                        target: '登録ユーザー・管理者',
+                        isRoot: false,
+                        icon: 'fa-gauge-high',
+                        badges: ['要ログイン', 'Web App']
+                    },
+                    {
+                        id: 's3',
+                        title: '公式開発者ドキュメント',
+                        domain: 'docs.apexcloud.io',
+                        url: 'https://docs.apexcloud.io',
+                        category: 'docs',
+                        status: 'Live',
+                        description: 'APIリファレンス、SDKのセットアップガイド、開発ノウハウを網羅したナレッジポータルサイト。',
+                        target: 'エンジニア・開発パートナー',
+                        isRoot: false,
+                        icon: 'fa-book-bookmark',
+                        badges: ['Docs', 'Open Access']
+                    },
+                    {
+                        id: 's4',
+                        title: 'Developer Portal & API',
+                        domain: 'developer.apexcloud.io',
+                        url: 'https://developer.apexcloud.io',
+                        category: 'dev',
+                        status: 'Beta',
+                        description: 'APIキーの発行、Webhook設定、OAuth2.0設定を行えるデベロッパー専用開発基盤。',
+                        target: '外部連携開発者',
+                        isRoot: false,
+                        icon: 'fa-code',
+                        badges: ['Developer', 'v2.4 API']
+                    },
+                    {
+                        id: 's5',
+                        title: 'Apex Tech Blog',
+                        domain: 'blog.apexcloud.io',
+                        url: 'https://blog.apexcloud.io',
+                        category: 'media',
+                        status: 'Live',
+                        description: '技術スタックの解説や新機能リリース情報、エンジニアチームによる解説記事を発信するオウンドメディア。',
+                        target: '一般・ITエンジニア',
+                        isRoot: false,
+                        icon: 'fa-newspaper',
+                        badges: ['Blog', '週刊更新']
+                    },
+                    {
+                        id: 's6',
+                        title: 'システム稼働状況 (Status Page)',
+                        domain: 'status.apexcloud.io',
+                        url: 'https://status.apexcloud.io',
+                        category: 'other',
+                        status: 'Live',
+                        description: '各サーバー・APIのリアルタイム動作ステータスおよび過去障害・メンテナンス情報の公開ページ。',
+                        target: '全ユーザー',
+                        isRoot: false,
+                        icon: 'fa-server',
+                        badges: ['Status 99.9%', 'Public']
+                    }
+                ]
+            },
+            {
+                id: 'brand-2',
+                brandName: 'NEXUS Studio (ゲーム・コミュニティ)',
+                rootDomain: 'nexus-studio.jp',
+                sites: [
+                    {
+                        id: 's201',
+                        title: 'NEXUS Studio 公式サイト',
+                        domain: 'nexus-studio.jp',
+                        url: 'https://nexus-studio.jp',
+                        category: 'main',
+                        status: 'Live',
+                        description: 'インディーゲームスタジオNEXUSの公式ブランドWebサイト。新作情報やプレスリリース。',
+                        target: 'ファン・プレイヤー',
+                        isRoot: true,
+                        icon: 'fa-gamepad',
+                        badges: ['Official', 'Portal']
+                    },
+                    {
+                        id: 's202',
+                        title: 'NEXUS Store (公式ショップ)',
+                        domain: 'store.nexus-studio.jp',
+                        url: 'https://store.nexus-studio.jp',
+                        category: 'app',
+                        status: 'Live',
+                        description: 'オリジナルグッズやデジタルコンテンツ、ゲームキーを直接購入できる公式ECサイト。',
+                        target: '購入希望者',
+                        isRoot: false,
+                        icon: 'fa-cart-shopping',
+                        badges: ['EC Site', 'Stripe導入']
+                    },
+                    {
+                        id: 's203',
+                        title: 'プレイヤーコミュニティ掲示板',
+                        domain: 'community.nexus-studio.jp',
+                        url: 'https://community.nexus-studio.jp',
+                        category: 'media',
+                        status: 'Live',
+                        description: 'ユーザー同士で攻略法や創作アイデアを交換・討論できる公式掲示板フォーラム。',
+                        target: '登録コミュニティ会員',
+                        isRoot: false,
+                        icon: 'fa-comments',
+                        badges: ['Forum', '要アカウント']
+                    }
+                ]
+            }
+        ];
+
+        const CATEGORIES = {
+            all: { label: 'すべて', icon: 'fa-border-all' },
+            main: { label: '本家・メイン', icon: 'fa-star' },
+            app: { label: 'サービス・アプリ', icon: 'fa-cubes' },
+            docs: { label: 'ドキュメント・ヘルプ', icon: 'fa-book' },
+            dev: { label: '開発者向け', icon: 'fa-code' },
+            media: { label: 'ブログ・メディア', icon: 'fa-newspaper' },
+            other: { label: 'その他', icon: 'fa-ellipsis' }
+        };
+
+        // App State
+        let data = JSON.parse(localStorage.getItem('domain_directory_data')) || INITIAL_DATA;
+        let currentBrandId = data[0].id;
+        let activeCategory = 'all';
+        let searchQuery = '';
+        let viewMode = 'grid'; // 'grid' or 'tree'
+
+        // Initialize Page
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('year').textContent = new Date().getFullYear();
+            renderBrandOptions();
+            renderCategoryFilters();
+            renderSites();
+        });
+
+        // Save data to localStorage
+        function saveData() {
+            localStorage.setItem('domain_directory_data', JSON.stringify(data));
+        }
+
+        // Render Brand Dropdown
+        function renderBrandOptions() {
+            const select = document.getElementById('brandSelect');
+            select.innerHTML = data.map(b => `<option value="${b.id}">${b.brandName} (${b.rootDomain})</option>`).join('');
+            select.value = currentBrandId;
+            
+            const currentBrand = getCurrentBrand();
+            document.getElementById('brandNameDisplay').textContent = currentBrand.brandName;
+        }
+
+        function getCurrentBrand() {
+            return data.find(b => b.id === currentBrandId) || data[0];
+        }
+
+        function switchBrand(brandId) {
+            currentBrandId = brandId;
+            const currentBrand = getCurrentBrand();
+            document.getElementById('brandNameDisplay').textContent = currentBrand.brandName;
+            renderSites();
+        }
+
+        // Render Category Filter Buttons
+        function renderCategoryFilters() {
+            const container = document.getElementById('categoryFilterContainer');
+            container.innerHTML = Object.entries(CATEGORIES).map(([key, value]) => `
+                <button onclick="setCategory('${key}')" class="category-btn px-3 py-2 rounded-xl text-xs font-medium transition flex items-center gap-1.5 whitespace-nowrap ${activeCategory === key ? 'bg-sky-600 text-white shadow-md shadow-sky-600/30' : 'bg-slate-900 border border-slate-800 text-slate-400 hover:text-slate-200 hover:border-slate-700'}">
+                    <i class="fa-solid ${value.icon}"></i>
+                    <span>${value.label}</span>
+                </button>
+            `).join('');
+        }
+
+        function setCategory(catKey) {
+            activeCategory = catKey;
+            renderCategoryFilters();
+            renderSites();
+        }
+
+        function filterSites() {
+            searchQuery = document.getElementById('searchInput').value.toLowerCase();
+            renderSites();
+        }
+
+        // Toggle Grid vs Tree View
+        function toggleViewMode() {
+            viewMode = viewMode === 'grid' ? 'tree' : 'grid';
+            const btnText = document.getElementById('viewModeText');
+            const gridContainer = document.getElementById('siteGridContainer');
+            const treeContainer = document.getElementById('siteTreeContainer');
+
+            if (viewMode === 'tree') {
+                btnText.textContent = 'カード表示';
+                gridContainer.classList.add('hidden');
+                treeContainer.classList.remove('hidden');
+            } else {
+                btnText.textContent = '階層マップ表示';
+                gridContainer.classList.remove('hidden');
+                treeContainer.classList.add('hidden');
+            }
+            renderSites();
+        }
+
+        // Main Render Logic
+        function renderSites() {
+            const currentBrand = getCurrentBrand();
+            let sites = currentBrand.sites;
+
+            // Apply Filters
+            if (activeCategory !== 'all') {
+                sites = sites.filter(s => s.category === activeCategory);
+            }
+
+            if (searchQuery) {
+                sites = sites.filter(s => 
+                    s.title.toLowerCase().includes(searchQuery) ||
+                    s.domain.toLowerCase().includes(searchQuery) ||
+                    s.description.toLowerCase().includes(searchQuery) ||
+                    (s.target && s.target.toLowerCase().includes(searchQuery))
+                );
+            }
+
+            if (viewMode === 'grid') {
+                renderGridView(sites);
+            } else {
+                renderTreeView(currentBrand, sites);
+            }
+        }
+
+        // Render Grid Cards
+        function renderGridView(sites) {
+            const container = document.getElementById('siteGridContainer');
+
+            if (sites.length === 0) {
+                container.innerHTML = `
+                    <div class="col-span-full py-16 text-center text-slate-500 bg-slate-900/50 rounded-2xl border border-slate-800">
+                        <i class="fa-solid fa-folder-open text-4xl mb-3 text-slate-600"></i>
+                        <p class="text-sm">条件に一致するサブドメイン・サイトが見つかりませんでした。</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = sites.map(site => `
+                <div class="group relative bg-slate-900/90 hover:bg-slate-900 border ${site.isRoot ? 'border-sky-500/50 shadow-lg shadow-sky-500/10' : 'border-slate-800 hover:border-slate-700'} rounded-2xl p-6 transition-all duration-300 flex flex-col justify-between glow-effect-hover">
+                    
+                    ${site.isRoot ? `
+                        <div class="absolute -top-3 right-4 bg-sky-500 text-white text-[10px] font-bold uppercase tracking-widest px-2.5 py-0.5 rounded-full shadow-md">
+                            Main Root Domain
+                        </div>
+                    ` : ''}
+
+                    <div>
+                        <!-- Header / Icon + Title -->
+                        <div class="flex items-start justify-between gap-3 mb-3">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-xl ${site.isRoot ? 'bg-sky-500/20 text-sky-400 border border-sky-500/30' : 'bg-slate-800 text-slate-300'} flex items-center justify-center font-bold text-lg group-hover:scale-105 transition-transform">
+                                    <i class="fa-solid ${site.icon || 'fa-globe'}"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-bold text-white text-base group-hover:text-sky-400 transition-colors line-clamp-1">
+                                        ${escapeHtml(site.title)}
+                                    </h3>
+                                    <a href="${site.url}" target="_blank" rel="noopener" class="text-xs text-sky-400/90 hover:text-sky-300 code-font flex items-center gap-1 mt-0.5">
+                                        ${site.domain}
+                                        <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Description -->
+                        <p class="text-slate-400 text-xs leading-relaxed mb-4 line-clamp-2">
+                            ${escapeHtml(site.description)}
+                        </p>
+
+                        <!-- Target / Purpose -->
+                        ${site.target ? `
+                            <div class="bg-slate-950/60 rounded-lg p-2 mb-4 border border-slate-800/80 flex items-center text-[11px] text-slate-400 gap-2">
+                                <i class="fa-solid fa-bullseye text-slate-500"></i>
+                                <span class="truncate">対象: <strong class="text-slate-300 font-normal">${escapeHtml(site.target)}</strong></span>
+                            </div>
+                        ` : ''}
+                    </div>
+
+                    <div>
+                        <!-- Badges -->
+                        <div class="flex flex-wrap gap-1.5 mb-5">
+                            <span class="px-2 py-0.5 rounded-md bg-slate-800 text-slate-300 text-[10px] font-medium border border-slate-700">
+                                ${CATEGORIES[site.category]?.label || '一般'}
+                            </span>
+                            <span class="px-2 py-0.5 rounded-md ${site.status === 'Live' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-amber-500/10 text-amber-400 border border-amber-500/20'} text-[10px] font-medium">
+                                ${site.status}
+                            </span>
+                            ${(site.badges || []).map(b => `
+                                <span class="px-2 py-0.5 rounded-md bg-slate-800/60 text-slate-400 text-[10px] border border-slate-800">
+                                    ${escapeHtml(b)}
+                                </span>
+                            `).join('')}
+                        </div>
+
+                        <!-- Actions -->
+                        <div class="flex items-center gap-2 pt-3 border-t border-slate-800/80">
+                            <a href="${site.url}" target="_blank" rel="noopener" class="flex-grow py-2 rounded-xl bg-slate-800 hover:bg-sky-600 text-slate-200 hover:text-white text-xs font-semibold text-center transition flex items-center justify-center gap-1.5 shadow-sm">
+                                <span>アクセス</span>
+                                <i class="fa-solid fa-chevron-right text-[10px]"></i>
+                            </a>
+                            <button onclick="copyToClipboard('${site.url}')" title="URLをコピー" class="p-2 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-400 hover:text-slate-200 text-xs transition border border-slate-700/50">
+                                <i class="fa-regular fa-copy"></i>
+                            </button>
+                            <button onclick="openModal('${site.id}')" title="詳細を見る" class="p-2 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-400 hover:text-slate-200 text-xs transition border border-slate-700/50">
+                                <i class="fa-solid fa-circle-info"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Render Tree Structure
+        function renderTreeView(brand, currentSites) {
+            const container = document.getElementById('treeViewContent');
+            const rootSite = brand.sites.find(s => s.isRoot) || brand.sites[0];
+            const subSites = brand.sites.filter(s => s.id !== rootSite.id);
+
+            container.innerHTML = `
+                <!-- Root Domain Node -->
+                <div class="relative pl-6 border-l-2 border-sky-500">
+                    <div class="bg-slate-800/90 border border-sky-500/40 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-lg">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-lg bg-sky-500/20 text-sky-400 flex items-center justify-center font-bold text-lg">
+                                <i class="fa-solid fa-network-wired"></i>
+                            </div>
+                            <div>
+                                <span class="text-[10px] text-sky-400 uppercase tracking-widest font-bold">ルートドメイン</span>
+                                <h4 class="font-bold text-white text-base">${escapeHtml(rootSite.title)}</h4>
+                                <span class="code-font text-xs text-slate-400">${rootSite.domain}</span>
+                            </div>
+                        </div>
+                        <a href="${rootSite.url}" target="_blank" class="px-3 py-1.5 rounded-lg bg-sky-600 hover:bg-sky-500 text-white text-xs font-medium self-start sm:self-auto flex items-center gap-1.5">
+                            <span>サイトを開く</span>
+                            <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
+                        </a>
+                    </div>
+
+                    <!-- Subdomains Branch -->
+                    <div class="mt-6 ml-4 space-y-4 relative before:absolute before:left-[-17px] before:top-0 before:bottom-4 before:w-0.5 before:bg-slate-800">
+                        ${subSites.map(site => `
+                            <div class="relative flex items-center gap-3 before:absolute before:left-[-17px] before:top-1/2 before:w-4 before:h-0.5 before:bg-slate-800">
+                                <div class="flex-grow bg-slate-950/80 border border-slate-800 hover:border-slate-700 rounded-xl p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 transition">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-8 h-8 rounded-lg bg-slate-800 text-slate-400 flex items-center justify-center text-sm">
+                                            <i class="fa-solid ${site.icon || 'fa-link'}"></i>
+                                        </div>
+                                        <div>
+                                            <h5 class="font-semibold text-slate-200 text-sm">${escapeHtml(site.title)}</h5>
+                                            <div class="flex items-center gap-2">
+                                                <span class="code-font text-xs text-sky-400">${site.domain}</span>
+                                                <span class="text-[10px] px-1.5 py-0.2 rounded bg-slate-800 text-slate-400">${CATEGORIES[site.category]?.label || 'サブドメイン'}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <button onclick="openModal('${site.id}')" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs transition">詳細</button>
+                                        <a href="${site.url}" target="_blank" class="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs"><i class="fa-solid fa-arrow-up-right-from-square"></i></a>
+                                    </div>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        // Modal Logic
+        function openModal(siteId) {
+            const currentBrand = getCurrentBrand();
+            const site = currentBrand.sites.find(s => s.id === siteId);
+            if (!site) return;
+
+            const modalContent = document.getElementById('modalContent');
+            modalContent.innerHTML = `
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="w-12 h-12 rounded-xl bg-sky-500/20 text-sky-400 border border-sky-500/30 flex items-center justify-center text-xl font-bold">
+                        <i class="fa-solid ${site.icon || 'fa-globe'}"></i>
+                    </div>
+                    <div>
+                        <span class="text-xs text-sky-400 font-semibold uppercase tracking-wider">${CATEGORIES[site.category]?.label || 'Webサービス'}</span>
+                        <h3 class="text-xl font-bold text-white leading-tight">${escapeHtml(site.title)}</h3>
+                    </div>
+                </div>
+
+                <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 flex items-center justify-between mb-5">
+                    <span class="code-font text-sky-400 text-sm font-medium truncate">${site.url}</span>
+                    <button onclick="copyToClipboard('${site.url}')" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs transition flex items-center gap-1 shrink-0">
+                        <i class="fa-regular fa-copy"></i> Copy
+                    </button>
+                </div>
+
+                <div class="space-y-4 mb-6">
+                    <div>
+                        <h4 class="text-xs font-semibold text-slate-400 uppercase mb-1">概要・役割</h4>
+                        <p class="text-sm text-slate-300 leading-relaxed bg-slate-950/40 p-3 rounded-lg border border-slate-800/50">
+                            ${escapeHtml(site.description)}
+                        </p>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <h4 class="text-xs font-semibold text-slate-400 uppercase mb-1">対象ユーザー</h4>
+                            <p class="text-sm text-slate-200 font-medium">${escapeHtml(site.target || '全ユーザー')}</p>
+                        </div>
+                        <div>
+                            <h4 class="text-xs font-semibold text-slate-400 uppercase mb-1">ステータス</h4>
+                            <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold ${site.status === 'Live' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-amber-500/10 text-amber-400'}">
+                                <span class="w-1.5 h-1.5 rounded-full ${site.status === 'Live' ? 'bg-emerald-400 animate-pulse' : 'bg-amber-400'}"></span>
+                                ${site.status}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pt-4 border-t border-slate-800 flex gap-3">
+                    <a href="${site.url}" target="_blank" rel="noopener" class="flex-grow py-2.5 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-semibold text-sm text-center shadow-lg shadow-sky-600/30 transition flex items-center justify-center gap-2">
+                        <span>Webサイトへ移動</span>
+                        <i class="fa-solid fa-arrow-up-right-from-square text-xs"></i>
+                    </a>
+                </div>
+            `;
+
+            const modal = document.getElementById('detailModal');
+            const card = document.getElementById('detailModalCard');
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+                card.classList.remove('scale-95');
+                card.classList.add('scale-100');
+            }, 10);
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('detailModal');
+            const card = document.getElementById('detailModalCard');
+            modal.classList.add('opacity-0');
+            card.classList.remove('scale-100');
+            card.classList.add('scale-95');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 200);
+        }
+
+        // Add Site Modal Handlers
+        function openAddModal() {
+            document.getElementById('addModal').classList.remove('hidden');
+        }
+
+        function closeAddModal() {
+            document.getElementById('addModal').classList.add('hidden');
+            document.getElementById('addSiteForm').reset();
+        }
+
+        function handleAddSite(e) {
+            e.preventDefault();
+            const title = document.getElementById('addTitle').value;
+            let domain = document.getElementById('addDomain').value.replace(/^https?:\/\//, '');
+            const category = document.getElementById('addCategory').value;
+            const description = document.getElementById('addDesc').value;
+            const target = document.getElementById('addTarget').value;
+
+            const newSite = {
+                id: 'custom-' + Date.now(),
+                title,
+                domain,
+                url: 'https://' + domain,
+                category,
+                status: 'Live',
+                description,
+                target: target || '全ユーザー',
+                isRoot: false,
+                icon: 'fa-globe',
+                badges: ['User Added']
+            };
+
+            const currentBrand = getCurrentBrand();
+            currentBrand.sites.push(newSite);
+            saveData();
+
+            closeAddModal();
+            renderSites();
+            showToast('新しいサイト・サブドメインを追加しました');
+        }
+
+        // Utility Functions
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                showToast('URLをクリップボードにコピーしました！');
+            }).catch(() => {
+                showToast('コピーに失敗しました');
+            });
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            const toastMsg = document.getElementById('toastMsg');
+            toastMsg.textContent = message;
+            
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            toast.classList.add('translate-y-0', 'opacity-100');
+
+            setTimeout(() => {
+                toast.classList.remove('translate-y-0', 'opacity-100');
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 3000);
+        }
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return str.replace(/[&<>"']/g, function(m) {
+                return {
+                    '&': '&amp;',
+                    '<': '&lt;',
+                    '>': '&gt;',
+                    '"': '&quot;',
+                    "'": '&#039;'
+                }[m];
+            });
+        }
+    </script>
+</body>
+</html>
